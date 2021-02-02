@@ -27,6 +27,9 @@ router.put('/', async (req, res) => {
 
     let json = JSON.parse(await readFile(global.fileName, 'utf8'));
     let index = json.grades.findIndex((grade) => grade.id === newGrade.id);
+    if (index === -1) {
+      throw new Error('ID não existente.');
+    }
 
     if (newGrade.student) {
       json.grades[index].student = newGrade.student;
@@ -44,6 +47,26 @@ router.put('/', async (req, res) => {
     await writeFile(global.fileName, JSON.stringify(json));
 
     res.send(json.grades[index]);
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    let json = JSON.parse(await readFile(global.fileName, 'utf8'));
+
+    let index = json.grades.findIndex(
+      (grade) => grade.id === parseInt(req.params.id, 10)
+    );
+    if (index === -1) {
+      throw new Error('ID não existente.');
+    }
+
+    json.grades.splice(index, 1);
+
+    await writeFile(global.fileName, JSON.stringify(json));
+    res.end();
   } catch (err) {
     res.status(400).send({ error: err.message });
   }
