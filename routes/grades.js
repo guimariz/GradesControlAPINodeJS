@@ -72,4 +72,21 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    let json = JSON.parse(await readFile(global.fileName, 'utf8'));
+
+    const grade = json.grades.find(
+      (grade) => grade.id === parseInt(req.params.id, 10)
+    );
+    if (grade) {
+      res.send(grade);
+    } else {
+      throw new Error('ID não existente.');
+    }
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
+
 export default router;
