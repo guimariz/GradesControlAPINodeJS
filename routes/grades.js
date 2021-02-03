@@ -89,4 +89,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.post('/total', async (req, res) => {
+  try {
+    const json = JSON.parse(await readFile(global.fileName, 'utf8'));
+    const grades = json.grades.filter(
+      (grade) =>
+        grade.student === req.body.student && grade.subject === req.body.subject
+    );
+    const total = grades.reduce((acc, cur) => acc + cur.value, 0);
+    res.send({ total });
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
+
 export default router;
