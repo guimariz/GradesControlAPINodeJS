@@ -103,4 +103,52 @@ router.post('/total', async (req, res) => {
   }
 });
 
+router.get('/average/:subject/:type', async (req, res) => {
+  try {
+    const json = JSON.parse(await readFile(global.fileName, 'utf8'));
+    const grades = json.grades.filter(
+      (grade) =>
+        grade.subject === req.params.subject && grade.type === req.params.type
+    );
+    if (!grades.length) {
+      throw new Error(
+        'Não foram encontrados registros para os parâmetros informados.'
+      );
+    }
+    const total = grades.reduce((acc, cur) => acc + cur.value, 0);
+
+    res.send({ average: total / grades.length });
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
+
+router.post('/bestGrades', async (req, res) => {
+  try {
+    const json = JSON.parse(await readFile(global.fileName, 'utf8'));
+    const grades = json.grades.filter(
+      (grade) =>
+        grade.subject === req.body.subject && grade.type === req.body.type
+    );
+
+    if (!grades.length) {
+      throw new Error(
+        'Não foram encontrados registros para os parâmetros informados.'
+      );
+    }
+
+    res.send(grades.slice(0, 3));
+
+    grades.sort((a, b) => {
+      if (a.value < b.value) return 1;
+      if (a.value > b.value) return -1;
+      else return 0;
+    });
+
+    res.send(grades);
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
+
 export default router;
